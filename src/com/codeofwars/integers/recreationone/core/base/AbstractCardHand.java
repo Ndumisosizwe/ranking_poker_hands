@@ -6,6 +6,7 @@ import com.codeofwars.integers.recreationone.value.CardRank;
 import com.codeofwars.integers.recreationone.value.Suit;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
@@ -46,12 +47,35 @@ public abstract class AbstractCardHand implements Hand {
 
 
     private Set<PlayingCard> splitStringHandIntoCardTypes(String pokerHand) {
+        HashSet<PlayingCard> playingCards = new HashSet<>();
         CardRank[] cardRanks = CardRank.values();
-        System.out.println(Arrays.toString(cardRanks));
         Suit[] suits = Suit.values();
         String[] cards = pokerHand.split(" ");
-
-        return new HashSet<>();
+        Arrays.stream(cards).forEach(c -> {
+            CardRank tempCardRank = null;
+            Suit tempSuit = null;
+            String[] rankBySuit = c.split("");
+            if (rankBySuit[0].matches("\\d+")) {
+                List<CardRank> findNumericRank = Arrays.stream(cardRanks)
+                        .filter(cr -> cr.getNumericValue() == Integer.parseInt(rankBySuit[0])).collect(Collectors.toList());
+                if (!findNumericRank.isEmpty()) {
+                    tempCardRank = findNumericRank.get(0);
+                }
+            } else {
+                List<CardRank> findNormalRank = Arrays.stream(cardRanks)
+                        .filter(cr -> cr.toString().equalsIgnoreCase(rankBySuit[0]))
+                        .collect(Collectors.toList());
+                if (!findNormalRank.isEmpty()) {
+                    tempCardRank = findNormalRank.get(0);
+                }
+            }
+            List<Suit> findSuit = Arrays.stream(suits).filter(cr -> cr.toString().equalsIgnoreCase(rankBySuit[1])).collect(Collectors.toList());
+            if (!findSuit.isEmpty())
+                tempSuit = findSuit.get(0);
+            playingCards.add(new PlayingCard(tempCardRank, tempSuit));
+        });
+        System.out.println(playingCards);
+        return playingCards;
     }
 
     protected boolean isSequential() {
